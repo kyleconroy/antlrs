@@ -60,7 +60,11 @@ SUPPORTED_GRAMMARS = set([
     "json",
     "tinyc",
     "gml",
+    "csv",
 ])
+
+def upperfirst(x):
+    return x[0].upper() + x[1:]
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -121,7 +125,7 @@ def main():
                 package=pkg,
                 lexer=grammar_name.text,
                 parser=grammar_name.text,
-                entrypoint=entry_point.text.capitalize(),
+                entrypoint=upperfirst(entry_point.text),
             ))
 
 if __name__ == "__main__":

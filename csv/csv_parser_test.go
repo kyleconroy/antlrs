@@ -1,4 +1,4 @@
-package gml
+package csv
 
 import (
 	"io/ioutil"
@@ -28,11 +28,11 @@ func TestExamples(t *testing.T) {
 		}
 		t.Run(file.Name(), func(t *testing.T) {
 			input := antlr.NewFileStream(filepath.Join("testdata", file.Name()))
-			lexer := NewgmlLexer(input)
+			lexer := NewCSVLexer(input)
 			stream := antlr.NewCommonTokenStream(lexer, 0)
-			p := NewgmlParser(stream)
+			p := NewCSVParser(stream)
 			p.AddErrorListener(TestingErrorListener{t: t})
-			p.Graph()
+			p.CsvFile()
 		})
 	}
 }
