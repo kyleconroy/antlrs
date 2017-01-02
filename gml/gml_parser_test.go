@@ -1,4 +1,4 @@
-package tinyc
+package gml
 
 import (
 	"io/ioutil"
@@ -28,11 +28,11 @@ func TestExamples(t *testing.T) {
 		}
 		t.Run(file.Name(), func(t *testing.T) {
 			input := antlr.NewFileStream(filepath.Join("testdata", file.Name()))
-			lexer := NewtinycLexer(input)
+			lexer := NewgmlLexer(input)
 			stream := antlr.NewCommonTokenStream(lexer, 0)
-			p := NewtinycParser(stream)
+			p := NewgmlParser(stream)
 			p.AddErrorListener(TestingErrorListener{t: t})
-			p.Program()
+			p.Graph()
 		})
 	}
 }

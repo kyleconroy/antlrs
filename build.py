@@ -56,6 +56,12 @@ func TestExamples(t *testing.T) {
 	}
 }""")
 
+SUPPORTED_GRAMMARS = set([
+    "json",
+    "tinyc",
+    "gml",
+])
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
@@ -63,7 +69,7 @@ def main():
     clone()
 
     for pl in os.listdir("_build/grammars"):
-        if pl not in ["json", "tinyc"]:
+        if pl not in SUPPORTED_GRAMMARS:
             continue
         fullpath = os.path.join("_build", "grammars", pl)
         pkg = pl.replace("-", "")
@@ -71,6 +77,7 @@ def main():
             continue
         if os.path.exists(pkg):
             continue
+
         for grammar in os.listdir(fullpath):
             if not grammar.endswith(".g4"):
                 continue
@@ -90,31 +97,32 @@ def main():
                 grammar,
             ], cwd=fullpath)
 
-            # Copy over the examples
-            shutil.copytree(
-                os.path.join(fullpath, "examples"),
-                os.path.join(pkg,"testdata"),
-            )
+        examples = os.path.join(fullpath, "examples")
+        if not os.path.exists(examples):
+            continue
 
+        # Copy over the examples
+        shutil.copytree(
+            examples,
+            os.path.join(pkg,"testdata"),
+        )
 
-            # Generate the test file
-            testfile = os.path.join(pkg, "{}_parser_test.go".format(pkg))
+        # Generate the test file
+        testfile = os.path.join(pkg, "{}_parser_test.go".format(pkg))
 
-            # Find the entry point
-            pomfile = os.path.join(fullpath, "pom.xml")
-            pom = xml.etree.ElementTree.parse(pomfile).getroot()
-            entry_point = pom.find(".//{http://maven.apache.org/POM/4.0.0}entryPoint")
+        # Find the entry point
+        pomfile = os.path.join(fullpath, "pom.xml")
+        pom = xml.etree.ElementTree.parse(pomfile).getroot()
+        entry_point = pom.find(".//{http://maven.apache.org/POM/4.0.0}entryPoint")
+        grammar_name = pom.find(".//{http://maven.apache.org/POM/4.0.0}grammarName")
 
-            with open(testfile,'w') as f:
-                filename, _ = os.path.splitext(grammar)
-                f.write(test_template.substitute(
-                    package=pkg,
-                    lexer=filename,
-                    parser=filename,
-                    entrypoint=entry_point.text.capitalize(),
-                ))
-
-            break
+        with open(testfile,'w') as f:
+            f.write(test_template.substitute(
+                package=pkg,
+                lexer=grammar_name.text,
+                parser=grammar_name.text,
+                entrypoint=entry_point.text.capitalize(),
+            ))
 
 if __name__ == "__main__":
     main()
